@@ -1,0 +1,7 @@
+AAAAA five
+AAAA2 four
+AA222 full
+AAA23 three
+AA223 two_pair
+AA234 pair
+A2345 high_card
