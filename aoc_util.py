@@ -15,6 +15,33 @@ class Debugger:
 
 dbg = Debugger()
 
+class InclusiveRange:
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
+        if self.min > self.max:
+            self.min = float('inf')
+            self.max = -float('inf')
+#            raise ValueError("Min cannot be greater than max")
+
+    def contains(self, value):
+        return self.min <= value <= self.max
+
+    def union(self, other):
+        return InclusiveRange(min(self.min, other.min), max(self.max, other.max))
+
+    def intersection(self, other):
+        return InclusiveRange(max(self.min, other.min), min(self.max, other.max))
+
+    def count(self):
+        if self.min > self.max:
+            return 0
+        return self.max - self.min + 1
+
+    def __repr__(self):
+        return f'InclusiveRange({self.min}, {self.max})'
+
+
 class Cols:
     def __init__(self, data):
         self.data = data
