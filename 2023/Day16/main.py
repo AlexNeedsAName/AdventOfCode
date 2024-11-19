@@ -76,7 +76,7 @@ class Board:
                     self.set(lazer.position, lazer.direction.as_char())
                 elif tile in "^v<>":
                     self.set(lazer.position, '2')
-                elif tile in "23456789":
+                elif tile in "23":
                     tile = str(int(tile)+1)
 
             sucessors = lazer.get_next(self.at(lazer.position))
@@ -129,6 +129,24 @@ def problem(input_file, part2=False):
         board.show_energized(energized_positions)
         return len(energized_positions)
 
+    else:
+        initial_lazers = []
+        for x in range(board.width):
+            initial_lazers.append(Lazer(Point(x,0), CardinalDirection.SOUTH))
+            initial_lazers.append(Lazer(Point(x,board.height-1), CardinalDirection.NORTH))
+        for y in range(board.width):
+            initial_lazers.append(Lazer(Point(0,y), CardinalDirection.EAST))
+            initial_lazers.append(Lazer(Point(board.width-1,y), CardinalDirection.WEST))
+        best_score = 0
+        best_lazer = None
+        for lazer in initial_lazers:
+            score = len(board.energize([lazer]))
+            if score > best_score:
+                best_score = score
+                best_lazer = lazer
+
+        return best_score
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -139,5 +157,5 @@ if __name__ == "__main__":
     print(f"DEBUG is {DEBUG}")
 
     print(problem(args.filename))
-#    print(problem(args.filename, part2=True))
+    print(problem(args.filename, part2=True))
 
