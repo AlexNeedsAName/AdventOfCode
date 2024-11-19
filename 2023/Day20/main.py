@@ -34,18 +34,21 @@ def problem(input_file, part2=False):
             sim.run()
         return sim.score()
     else:
-        count = 0
-        while not sim.rx_low:
+        while len(sim.conjunction_cycles) < 4:
             sim.push_the_button()
             sim.run()
-            count += 1
-        return count
+        result = 1
+        for key,value in sim.conjunction_cycles.items():
+            result *= value
+        return result
 
 
 
 class Sim:
     def __init__(self, file):
         self.pulse_count = {LOW: 0, HIGH: 0}
+        self.press_count = 0
+        self.conjunction_cycles = {}
         self.modules = {}
         self.pulse_queue = deque()
         links = []
@@ -72,7 +75,10 @@ class Sim:
 
         if dst == 'rx' and pulse == LOW:
             self.rx_low = True
-
+        elif dst == 'zh' and pulse == HIGH:
+            if src not in self.conjunction_cycles.keys():
+                self.conjunction_cycles[src] = self.press_count
+                print(self.conjunction_cycles)
         try:
             self.modules[dst].get_pulse(pulse, src)
         except KeyError:
@@ -80,6 +86,7 @@ class Sim:
 
     def push_the_button(self):
         dbg.print("Pushing the button")
+        self.press_count += 1
         self.pulse_queue.append(('broadcaster', LOW, 'button'))
 
     def run(self):
