@@ -1,27 +1,29 @@
 #!/usr/bin/env python3
 import argparse
 from aoc_util import dbg
-import math
+from collections import defaultdict
 
 def problem(input_file, part2=False):
+    left = []
+    right = []
     with open(input_file, 'r') as file:
-        left = []
-        right = []
         for line in file:
             line = line.strip()
             l,r = line.split()
             left.append(int(l))
             right.append(int(r))
 
+    if not part2:
         left = sorted(left)
         right = sorted(right)
-
-    if not part2:
         return sum(abs(l-r) for l,r in zip(left,right))
 
     total = 0
+    counts = defaultdict(lambda: 0)
+    for number in right:
+        counts[number] += 1
     for number in left:
-        total += number * right.count(number)
+        total += number * counts[number]
     return total
 
 
