@@ -10,12 +10,10 @@ def problem(input_file, part2=False):
             line = line.strip()
             lines.append(line)
     full_input = '\n'.join(lines)
-    result = re.findall("(mul\([\d]*,[\d]*\))|(do\(\))|(don't\(\))", full_input)
+    result = re.findall("(mul\([\d]*,[\d]*\)|do\(\)|don't\(\))", full_input)
     total = 0
     enabled = True
     for command in result:
-        # I'm doing my regex slightly wrong since it's returning a tuple. ¯\_(ツ)_/¯
-        command = ''.join(command)
         if command.startswith("don't"):
             enabled = False
         elif command.startswith("do"):
