@@ -11,12 +11,66 @@ class Map:
         self.robot = robot
         self.double_wide = double_wide
 
+    def try_move_box(self, point, direction, visited=None):
+        if visited is None:
+            visited = set()
+        if point in visited:
+            return True, set()
+
+        if point in self.boxes:
+            left_point = point
+            right_point = point.move(CardinalDirection.EAST)
+        elif point.move(CardinalDirection.WEST) in self.boxes:
+            right_point = point
+            left_point = point.move(CardinalDirection.WEST)
+        elif point in self.walls:
+            return False, None
+        else:
+            return True, set()
+
+
+        # We know we're trying to move a box and what the left and right points of the box are
+        # Add them to the visited set so any thing that checks the same box can just skip it
+        visited.add(left_point)
+        visited.add(right_point)
+
+        if direction in (CardinalDirection.NORTH, CardinalDirection.SOUTH):
+            # Moving up and down
+            success, left_moved = self.try_move_box(left_point.move(direction), direction)
+            if not success:
+                return False, None
+            success, right_moved = self.try_move_box(right_point.move(direction), direction)
+            if not success:
+                return False, None
+            moved_boxes = left_moved.union(right_moved)
+            moved_boxes.add(left_point)
+            return True, moved_boxes
+
+        if direction == CardinalDirection.EAST:
+            point_to_move = right_point
+        else:
+            point_to_move = left_point
+
+        success, moved_boxes = self.try_move_box(point_to_move.move(direction), direction)
+        if not success:
+            return False, None
+        moved_boxes.add(left_point)
+        return True, moved_boxes
 
     def move(self, direction):
         next = self.robot.move(direction)
         if next in self.walls:
             return False
-        elif next in self.boxes:
+
+        if self.double_wide:
+            success, moved_boxes = self.try_move_box(next, direction)
+            if success:
+                self.boxes -= moved_boxes
+                for box in moved_boxes:
+                    self.boxes.add(box.move(direction))
+            else:
+                return False
+        if next in self.boxes:
             pushed_into = next.move(direction)
             while True:
                 if pushed_into in self.walls:
@@ -60,7 +114,15 @@ class Map:
                 break
             height = y
             if double_wide:
-                line = ''.join([f'{c}{c}' if c != 'O' else '[]' for c in line])
+                new_line = []
+                for c in line:
+                    if c == 'O':
+                        new_line.append('[]')
+                    elif c == '@':
+                        new_line.append('@.')
+                    else:
+                        new_line.append(f'{c}{c}')
+                line = ''.join(new_line)
             grid.append([c for c in line])
             for x,c in enumerate(line):
                 width = x
@@ -126,6 +188,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     dbg.set_level(args.verbose)
 
-#    print(problem(args.filename))
+    print(problem(args.filename))
     print(problem(args.filename, part2=True))
 
